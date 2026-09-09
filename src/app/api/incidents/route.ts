@@ -2,6 +2,54 @@ import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { validateCreateIncidentInput } from '@/lib/incidents/validation';
 
+export async function GET() {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !authData.user) {
+      return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, barangay_id, role, is_active')
+      .eq('id', authData.user.id)
+      .maybeSingle();
+
+    if (profileError) {
+      console.error('incident list profile lookup failed', profileError);
+      return NextResponse.json({ error: 'Unable to verify account.' }, { status: 500 });
+    }
+
+    if (!profile?.is_active || !profile.barangay_id) {
+      return NextResponse.json({ error: 'An active barangay profile is required.' }, { status: 403 });
+    }
+
+    const staffRoles = ['super_admin', 'lgu_admin', 'barangay_admin', 'official', 'responder', 'auditor'];
+    const isStaff = staffRoles.includes(profile.role);
+
+    let query = supabase
+      .from('incidents')
+      .select('id, reference_number, category, subcategory, description, latitude, longitude, location_text, landmark, priority, ai_priority, status, reporter_id, verified_by, assigned_to, created_at, updated_at, verified_at, assigned_at, responding_at, on_site_at, resolved_at, closed_at')
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    query = isStaff ? query.eq('barangay_id', profile.barangay_id) : query.eq('reporter_id', authData.user.id);
+
+    const { data: incidents, error } = await query;
+    if (error) {
+      console.error('incident list query failed', error);
+      return NextResponse.json({ error: 'Unable to load incidents.' }, { status: 500 });
+    }
+
+    return NextResponse.json({ incidents: incidents ?? [] });
+  } catch (error) {
+    console.error('incident list failed', error);
+    return NextResponse.json({ error: 'Incident service is temporarily unavailable.' }, { status: 503 });
+  }
+}
+
 export async function POST(request: Request) {
   let body: unknown;
   try {
