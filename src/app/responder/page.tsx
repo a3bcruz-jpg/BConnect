@@ -78,9 +78,12 @@ export default function ResponderPage() {
                 </div>
 
                 <div className="mt-5 flex flex-wrap gap-2">
-                  <button className="rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-semibold text-white">Acknowledge</button>
-                  <button className="rounded-xl border border-slate-300 px-4 py-2.5 text-xs font-semibold text-slate-700">Update status</button>
-                  <button className="rounded-xl border border-slate-300 px-4 py-2.5 text-xs font-semibold text-slate-700">View incident</button>
+                  <Link href={`/responder/incidents/${incident.id}`} className="rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-semibold text-white hover:bg-slate-800">
+                    Open incident
+                  </Link>
+                  <Link href={`/responder/incidents/${incident.id}`} className="rounded-xl border border-slate-300 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:border-slate-400">
+                    Update status
+                  </Link>
                 </div>
               </article>
             ))}
