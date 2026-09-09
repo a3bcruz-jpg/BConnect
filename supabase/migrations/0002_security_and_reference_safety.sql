@@ -14,7 +14,7 @@ $$;
 revoke all on function public.next_incident_reference() from public;
 grant execute on function public.next_incident_reference() to authenticated;
 
-a lter sequence public.incident_reference_seq owner to postgres;
+alter sequence public.incident_reference_seq owner to postgres;
 
 create or replace function public.current_app_role()
 returns public.app_role
