@@ -52,7 +52,10 @@ export default function ResponderPage() {
       const response = await fetch('/api/incidents', { cache: 'no-store' });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || 'Unable to load assignments.');
-      setAssignments((data.incidents ?? []).filter((incident: Incident) => incident.assigned_to));
+      const active = (data.incidents ?? []).filter(
+        (incident: Incident) => incident.assigned_to && !['resolved', 'closed', 'cancelled', 'rejected', 'duplicate'].includes(incident.status),
+      );
+      setAssignments(active);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load assignments.');
     } finally {
