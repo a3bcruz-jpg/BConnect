@@ -16,6 +16,8 @@ type Incident = {
   created_at: string;
 };
 
+type Availability = 'available' | 'busy' | 'offline';
+
 const priorityStyles: Record<string, string> = {
   critical: 'bg-red-50 text-red-700',
   high: 'bg-red-50 text-red-700',
@@ -31,6 +33,12 @@ const statusLabels: Record<string, string> = {
   resolved: 'Resolved',
 };
 
+const availabilityLabels: Record<Availability, string> = {
+  available: 'Available',
+  busy: 'Busy',
+  offline: 'Offline',
+};
+
 function formatText(value: string) {
   return value.replace(/[_-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
@@ -43,8 +51,12 @@ function formatReported(value: string) {
 
 export default function ResponderPage() {
   const [assignments, setAssignments] = useState<Incident[]>([]);
+  const [availability, setAvailability] = useState<Availability>('available');
+  const [availabilityLoading, setAvailabilityLoading] = useState(true);
+  const [availabilitySaving, setAvailabilitySaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [availabilityError, setAvailabilityError] = useState('');
 
   async function loadAssignments() {
     try {
@@ -63,9 +75,54 @@ export default function ResponderPage() {
     }
   }
 
+  async function loadAvailability() {
+    try {
+      setAvailabilityError('');
+      const response = await fetch('/api/responders/availability', { cache: 'no-store' });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || 'Unable to load availability.');
+      if (data.availability === 'available' || data.availability === 'busy' || data.availability === 'offline') {
+        setAvailability(data.availability);
+      }
+    } catch (err) {
+      setAvailabilityError(err instanceof Error ? err.message : 'Unable to load availability.');
+    } finally {
+      setAvailabilityLoading(false);
+    }
+  }
+
+  async function changeAvailability(next: Availability) {
+    if (availabilitySaving || next === availability) return;
+    const previous = availability;
+    setAvailability(next);
+    setAvailabilitySaving(true);
+    setAvailabilityError('');
+    try {
+      const response = await fetch('/api/responders/availability', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ availability: next }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data?.error || 'Unable to update availability.');
+      if (data.availability === 'available' || data.availability === 'busy' || data.availability === 'offline') {
+        setAvailability(data.availability);
+      }
+    } catch (err) {
+      setAvailability(previous);
+      setAvailabilityError(err instanceof Error ? err.message : 'Unable to update availability.');
+    } finally {
+      setAvailabilitySaving(false);
+    }
+  }
+
   useEffect(() => {
     loadAssignments();
-    const interval = window.setInterval(loadAssignments, 30000);
+    loadAvailability();
+    const interval = window.setInterval(() => {
+      loadAssignments();
+      loadAvailability();
+    }, 30000);
     return () => window.clearInterval(interval);
   }, []);
 
@@ -74,8 +131,16 @@ export default function ResponderPage() {
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div><p className="text-sm font-semibold text-slate-900">BConnect</p><p className="text-xs text-slate-500">Responder workspace</p></div>
-          <div className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700">On duty</div>
+          <div className="flex items-center gap-2">
+            <label htmlFor="availability" className="sr-only">Responder availability</label>
+            <select id="availability" value={availability} onChange={(event) => changeAvailability(event.target.value as Availability)} disabled={availabilityLoading || availabilitySaving} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-blue-600 disabled:opacity-60">
+              {(Object.keys(availabilityLabels) as Availability[]).map((item) => <option key={item} value={item}>{availabilityLabels[item]}</option>)}
+            </select>
+            <span className="text-xs text-slate-500">{availabilitySaving ? 'Saving…' : 'Duty status'}</span>
+          </div>
         </header>
+
+        {availabilityError && <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">{availabilityError}</div>}
 
         <section className="mt-8 rounded-3xl bg-slate-950 p-6 text-white sm:p-8">
           <p className="text-sm text-slate-400">Assigned to you</p>
