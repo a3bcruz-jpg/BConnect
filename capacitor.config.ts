@@ -3,10 +3,10 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'ph.bconnect.app',
   appName: 'BConnect',
-  webDir: '.next',
+  // Capacitor requires a valid local web directory during sync. The Android
+  // preview loads the deployed Next.js app when CAPACITOR_SERVER_URL is set.
+  webDir: 'public',
   server: {
-    // Development/test preview can point the Android shell at the deployed
-    // BConnect web app. Keep this disabled for normal web/Vercel builds.
     url: process.env.CAPACITOR_SERVER_URL,
     cleartext: false,
   },
