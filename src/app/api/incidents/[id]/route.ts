@@ -91,7 +91,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (requestedStatus === 'closed') update.closed_at = new Date().toISOString();
 
     const { data: updatedIncident, error: updateError } = await supabase.from('incidents').update(update).eq('id', id).select('*').single();
-    if (updateError || !updatedIncident) { console.error('incident update failed', updateError); return NextResponse.json({ error: 'Unable to update incident.' }, { status: 500 }); }
+    if (updateError || !updatedIncident) {
+      console.error('incident update failed', updateError);
+      return NextResponse.json({ error: 'Unable to update incident.', debug: updateError ? { code: updateError.code, message: updateError.message, hint: updateError.hint } : { message: 'No updated incident returned.' } }, { status: 500 });
+    }
     if (requestedStatus || note || assignedTo || priority) {
       const historyNote = assignedTo ? `Assigned responder: ${responderName ?? assignedTo}${note ? ` — ${note}` : ''}` : note ?? null;
       const { error: historyError } = await supabase.from('incident_updates').insert({ incident_id: id, user_id: authData.user.id, previous_status: incident.status, new_status: requestedStatus ?? incident.status, note: historyNote });
