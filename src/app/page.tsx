@@ -34,16 +34,10 @@ export default function HomePage() {
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              href="/resident"
+              href="/login"
               className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
             >
-              Resident portal
-            </Link>
-            <Link
-              href="/official"
-              className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-100"
-            >
-              Barangay dashboard
+              Sign in to BConnect
             </Link>
           </div>
         </div>
