@@ -23,12 +23,16 @@ alter table public.notifications
   alter column priority set default 'normal',
   alter column priority set not null;
 
-drop constraint if exists notifications_priority_check;
+alter table public.notifications
+  drop constraint if exists notifications_priority_check;
+
 alter table public.notifications
   add constraint notifications_priority_check
   check (priority in ('critical', 'high', 'normal'));
 
-drop constraint if exists notifications_type_check;
+alter table public.notifications
+  drop constraint if exists notifications_type_check;
+
 alter table public.notifications
   add constraint notifications_type_check
   check (type in (
