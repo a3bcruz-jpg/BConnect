@@ -35,13 +35,19 @@ jobs:
         run: |
           set -euo pipefail
           SDK_ROOT="$RUNNER_TEMP/android-sdk"
+          DOWNLOAD_DIR="$RUNNER_TEMP/android-cmdline-tools-download"
           CMDLINE_DIR="$SDK_ROOT/cmdline-tools/latest"
-          mkdir -p "$SDK_ROOT/cmdline-tools"
+
+          rm -rf "$SDK_ROOT" "$DOWNLOAD_DIR"
+          mkdir -p "$SDK_ROOT/cmdline-tools" "$DOWNLOAD_DIR"
+
           curl --fail --silent --show-error --location \
             https://dl.google.com/android/repository/commandlinetools-linux-12266719_latest.zip \
             --output "$RUNNER_TEMP/android-cmdline-tools.zip"
-          unzip -q "$RUNNER_TEMP/android-cmdline-tools.zip" -d "$RUNNER_TEMP/android-cmdline-tools"
-          mv "$RUNNER_TEMP/android-cmdline-tools/cmdline-tools" "$CMDLINE_DIR"
+          unzip -q "$RUNNER_TEMP/android-cmdline-tools.zip" -d "$DOWNLOAD_DIR"
+          test -x "$DOWNLOAD_DIR/cmdline-tools/bin/sdkmanager"
+          mv "$DOWNLOAD_DIR/cmdline-tools" "$CMDLINE_DIR"
+
           SDKMANAGER="$CMDLINE_DIR/bin/sdkmanager"
           test -x "$SDKMANAGER"
           {
