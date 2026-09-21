@@ -9,10 +9,14 @@ on:
 permissions:
   contents: read
 
+env:
+  ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+  ANDROID_HOME: /usr/local/lib/android/sdk
+
 jobs:
   android-debug:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Checkout
@@ -31,14 +35,10 @@ jobs:
           java-version: '17'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: 12266719
-          packages: platform-tools
-
-      - name: Install required Android platform
         run: |
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+          test -d "$ANDROID_SDK_ROOT"
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Verify Android SDK
         run: |
