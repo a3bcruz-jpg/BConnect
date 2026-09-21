@@ -16,7 +16,7 @@ env:
 jobs:
   android-debug:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -34,42 +34,39 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Bootstrap Android command-line tools
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 12266719
+          packages: ''
+
       - name: Locate Android SDK tools
         shell: bash
         run: |
           set -euo pipefail
-          SDK_ROOTS=(
-            "$ANDROID_SDK_ROOT"
-            "/opt/android-sdk"
-            "$HOME/Android/Sdk"
-          )
-          SDKMANAGER=""
-          for root in "${SDK_ROOTS[@]}"; do
-            if [ -d "$root" ]; then
-              SDKMANAGER="$(find "$root" -type f -name sdkmanager -print -quit 2>/dev/null || true)"
-              if [ -n "$SDKMANAGER" ]; then
-                ANDROID_SDK_ROOT="$root"
-                break
-              fi
-            fi
-          done
+          SDKMANAGER="$(find "$ANDROID_SDK_ROOT/cmdline-tools" -type f -name sdkmanager -print -quit 2>/dev/null || true)"
+          ADB="$ANDROID_SDK_ROOT/platform-tools/adb"
           if [ -z "$SDKMANAGER" ]; then
-            echo "Android SDK directory contents:"
-            find /usr/local/lib/android /opt/android-sdk "$HOME/Android" -maxdepth 5 -type f \( -name sdkmanager -o -name adb \) -print 2>/dev/null || true
-            echo "sdkmanager was not found"
+            SDKMANAGER="$(find /usr/local/lib/android/sdk /opt/android-sdk "$HOME/Android/Sdk" -type f -name sdkmanager -print -quit 2>/dev/null || true)"
+          fi
+          if [ -z "$SDKMANAGER" ]; then
+            echo "Android SDK layout:"
+            find /usr/local/lib/android /opt/android-sdk "$HOME/Android" -maxdepth 6 -type f -name sdkmanager -print 2>/dev/null || true
             exit 1
           fi
-          SDKMANAGER_DIR="$(dirname "$SDKMANAGER")"
-          ADB="$(find "$ANDROID_SDK_ROOT/platform-tools" -type f -name adb -print -quit 2>/dev/null || true)"
+          SDK_ROOT="$(cd "$(dirname "$(dirname "$(dirname "$SDKMANAGER")")")" && pwd)"
+          if [ ! -x "$ADB" ]; then
+            ADB="$(find "$SDK_ROOT/platform-tools" -type f -name adb -print -quit 2>/dev/null || true)"
+          fi
           test -n "$ADB"
           {
-            echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-            echo "ANDROID_HOME=$ANDROID_SDK_ROOT"
+            echo "ANDROID_SDK_ROOT=$SDK_ROOT"
+            echo "ANDROID_HOME=$SDK_ROOT"
             echo "SDKMANAGER=$SDKMANAGER"
             echo "ADB=$ADB"
           } >> "$GITHUB_ENV"
           {
-            echo "$SDKMANAGER_DIR"
+            echo "$(dirname "$SDKMANAGER")"
             echo "$(dirname "$ADB")"
           } >> "$GITHUB_PATH"
 
@@ -84,9 +81,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -x "$SDKMANAGER"
-          test -x "$ADB"
-          "$ADB" version
+          command -v sdkmanager
+          command -v adb
+          adb version
           "$SDKMANAGER" --list_installed | grep -E 'platforms;android-36|build-tools;36.0.0'
 
       - name: Install dependencies
