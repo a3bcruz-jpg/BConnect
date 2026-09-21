@@ -34,25 +34,60 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Setup Android SDK
+      - name: Locate Android SDK tools
         shell: bash
         run: |
-          test -d "$ANDROID_SDK_ROOT"
-          SDKMANAGER="$(find "$ANDROID_SDK_ROOT/cmdline-tools" -type f -name sdkmanager -print -quit 2>/dev/null || true)"
-          test -n "$SDKMANAGER"
+          set -euo pipefail
+          SDK_ROOTS=(
+            "$ANDROID_SDK_ROOT"
+            "/opt/android-sdk"
+            "$HOME/Android/Sdk"
+          )
+          SDKMANAGER=""
+          for root in "${SDK_ROOTS[@]}"; do
+            if [ -d "$root" ]; then
+              SDKMANAGER="$(find "$root" -type f -name sdkmanager -print -quit 2>/dev/null || true)"
+              if [ -n "$SDKMANAGER" ]; then
+                ANDROID_SDK_ROOT="$root"
+                break
+              fi
+            fi
+          done
+          if [ -z "$SDKMANAGER" ]; then
+            echo "Android SDK directory contents:"
+            find /usr/local/lib/android /opt/android-sdk "$HOME/Android" -maxdepth 5 -type f \( -name sdkmanager -o -name adb \) -print 2>/dev/null || true
+            echo "sdkmanager was not found"
+            exit 1
+          fi
           SDKMANAGER_DIR="$(dirname "$SDKMANAGER")"
-          echo "$SDKMANAGER_DIR" >> "$GITHUB_PATH"
-          echo "$ANDROID_SDK_ROOT/platform-tools" >> "$GITHUB_PATH"
-          export PATH="$SDKMANAGER_DIR:$ANDROID_SDK_ROOT/platform-tools:$PATH"
+          ADB="$(find "$ANDROID_SDK_ROOT/platform-tools" -type f -name adb -print -quit 2>/dev/null || true)"
+          test -n "$ADB"
+          {
+            echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+            echo "ANDROID_HOME=$ANDROID_SDK_ROOT"
+            echo "SDKMANAGER=$SDKMANAGER"
+            echo "ADB=$ADB"
+          } >> "$GITHUB_ENV"
+          {
+            echo "$SDKMANAGER_DIR"
+            echo "$(dirname "$ADB")"
+          } >> "$GITHUB_PATH"
+
+      - name: Install required Android packages
+        shell: bash
+        run: |
+          set -euo pipefail
           yes | "$SDKMANAGER" --licenses >/dev/null || true
           "$SDKMANAGER" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Verify Android SDK
+        shell: bash
         run: |
-          command -v sdkmanager
-          command -v adb
-          adb version
-          sdkmanager --list_installed | grep -E 'platforms;android-36|build-tools;36.0.0'
+          set -euo pipefail
+          test -x "$SDKMANAGER"
+          test -x "$ADB"
+          "$ADB" version
+          "$SDKMANAGER" --list_installed | grep -E 'platforms;android-36|build-tools;36.0.0'
 
       - name: Install dependencies
         run: npm install
