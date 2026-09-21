@@ -5,9 +5,10 @@ on:
   push:
     branches:
       - feat/incident-ops-live
+      - main
   pull_request:
     branches:
-      - feat/incident-ops-live
+      - main
 
 concurrency:
   group: web-quality-${{ github.ref }}
