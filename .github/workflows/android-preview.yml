@@ -9,10 +9,6 @@ on:
 permissions:
   contents: read
 
-env:
-  ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-  ANDROID_HOME: /usr/local/lib/android/sdk
-
 jobs:
   android-debug:
     runs-on: ubuntu-latest
@@ -34,48 +30,39 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Bootstrap Android command-line tools
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: 12266719
-          packages: ''
-
-      - name: Locate Android SDK tools
+      - name: Bootstrap Android SDK command-line tools
         shell: bash
         run: |
           set -euo pipefail
-          SDKMANAGER="$(find "$ANDROID_SDK_ROOT/cmdline-tools" -type f -name sdkmanager -print -quit 2>/dev/null || true)"
-          ADB="$ANDROID_SDK_ROOT/platform-tools/adb"
-          if [ -z "$SDKMANAGER" ]; then
-            SDKMANAGER="$(find /usr/local/lib/android/sdk /opt/android-sdk "$HOME/Android/Sdk" -type f -name sdkmanager -print -quit 2>/dev/null || true)"
-          fi
-          if [ -z "$SDKMANAGER" ]; then
-            echo "Android SDK layout:"
-            find /usr/local/lib/android /opt/android-sdk "$HOME/Android" -maxdepth 6 -type f -name sdkmanager -print 2>/dev/null || true
-            exit 1
-          fi
-          SDK_ROOT="$(cd "$(dirname "$(dirname "$(dirname "$SDKMANAGER")")")" && pwd)"
-          if [ ! -x "$ADB" ]; then
-            ADB="$(find "$SDK_ROOT/platform-tools" -type f -name adb -print -quit 2>/dev/null || true)"
-          fi
-          test -n "$ADB"
+          SDK_ROOT="$RUNNER_TEMP/android-sdk"
+          CMDLINE_DIR="$SDK_ROOT/cmdline-tools/latest"
+          mkdir -p "$SDK_ROOT/cmdline-tools"
+          curl --fail --silent --show-error --location \
+            https://dl.google.com/android/repository/commandlinetools-linux-12266719_latest.zip \
+            --output "$RUNNER_TEMP/android-cmdline-tools.zip"
+          unzip -q "$RUNNER_TEMP/android-cmdline-tools.zip" -d "$RUNNER_TEMP/android-cmdline-tools"
+          mv "$RUNNER_TEMP/android-cmdline-tools/cmdline-tools" "$CMDLINE_DIR"
+          SDKMANAGER="$CMDLINE_DIR/bin/sdkmanager"
+          test -x "$SDKMANAGER"
           {
             echo "ANDROID_SDK_ROOT=$SDK_ROOT"
             echo "ANDROID_HOME=$SDK_ROOT"
             echo "SDKMANAGER=$SDKMANAGER"
-            echo "ADB=$ADB"
           } >> "$GITHUB_ENV"
           {
-            echo "$(dirname "$SDKMANAGER")"
-            echo "$(dirname "$ADB")"
+            echo "$CMDLINE_DIR/bin"
+            echo "$SDK_ROOT/platform-tools"
           } >> "$GITHUB_PATH"
 
       - name: Install required Android packages
         shell: bash
         run: |
           set -euo pipefail
-          yes | "$SDKMANAGER" --licenses >/dev/null || true
-          "$SDKMANAGER" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          yes | "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" --licenses >/dev/null || true
+          "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" \
+            "platform-tools" \
+            "platforms;android-36" \
+            "build-tools;36.0.0"
 
       - name: Verify Android SDK
         shell: bash
@@ -84,7 +71,8 @@ jobs:
           command -v sdkmanager
           command -v adb
           adb version
-          "$SDKMANAGER" --list_installed | grep -E 'platforms;android-36|build-tools;36.0.0'
+          "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" --list_installed \
+            | grep -E 'platforms;android-36|build-tools;36.0.0'
 
       - name: Install dependencies
         run: npm install
