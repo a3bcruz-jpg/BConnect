@@ -88,7 +88,7 @@ jobs:
 
       - name: Sync Capacitor
         env:
-          CAPACITOR_SERVER_URL: https://b-connect-virid.vercel.app
+          CAPACITOR_SERVER_URL: https://b-connect-git-feat-incident-ops-live-a3bcruz-9374s-projects.vercel.app
         run: npx cap sync android
 
       - name: Build debug APK
