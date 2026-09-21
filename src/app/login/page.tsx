@@ -93,20 +93,20 @@ export default function LoginPage() {
           {resetSent && <div role="status" className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-800">If an account exists for this email, a password reset link has been sent. Check your inbox and spam folder.</div>}
           {resetMode ? (
             <form onSubmit={handlePasswordReset} className="mt-6 space-y-4">
-              <div>
-                <label htmlFor="reset-email" className="text-sm font-bold text-slate-700">Email address</label>
-                <input id="reset-email" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[#0b66c3] focus:bg-white focus:ring-4 focus:ring-blue-50" />
-              </div>
+              <div><label htmlFor="reset-email" className="text-sm font-bold text-slate-700">Email address</label><input id="reset-email" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[#0b66c3] focus:bg-white focus:ring-4 focus:ring-blue-50" /></div>
               <button type="submit" disabled={submitting} className="w-full rounded-xl bg-[#0b66c3] px-5 py-3.5 text-sm font-extrabold text-white shadow-sm hover:bg-[#084d91] disabled:cursor-not-allowed disabled:opacity-50">{submitting ? 'SENDING…' : 'SEND RESET LINK'}</button>
               <button type="button" onClick={() => { setResetMode(false); setError(''); setResetSent(false); }} className="w-full text-sm font-bold text-[#0b66c3]">Back to sign in</button>
             </form>
           ) : (
-            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-              <div><label htmlFor="email" className="text-sm font-bold text-slate-700">Email address</label><input id="email" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[#0b66c3] focus:bg-white focus:ring-4 focus:ring-blue-50" /></div>
-              <div><label htmlFor="password" className="text-sm font-bold text-slate-700">Password</label><input id="password" type="password" required autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[#0b66c3] focus:bg-white focus:ring-4 focus:ring-blue-50" /></div>
-              <div className="text-right"><button type="button" onClick={() => { setResetMode(true); setError(''); }} className="text-sm font-bold text-[#0b66c3] hover:underline">Forgot password?</button></div>
-              <button type="submit" disabled={submitting} className="w-full rounded-xl bg-[#0b66c3] px-5 py-3.5 text-sm font-extrabold text-white shadow-sm hover:bg-[#084d91] disabled:cursor-not-allowed disabled:opacity-50">{submitting ? 'SIGNING IN…' : 'SIGN IN'}</button>
-            </form>
+            <>
+              <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+                <div><label htmlFor="email" className="text-sm font-bold text-slate-700">Email address</label><input id="email" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[#0b66c3] focus:bg-white focus:ring-4 focus:ring-blue-50" /></div>
+                <div><label htmlFor="password" className="text-sm font-bold text-slate-700">Password</label><input id="password" type="password" required autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[#0b66c3] focus:bg-white focus:ring-4 focus:ring-blue-50" /></div>
+                <div className="text-right"><button type="button" onClick={() => { setResetMode(true); setError(''); }} className="text-sm font-bold text-[#0b66c3] hover:underline">Forgot password?</button></div>
+                <button type="submit" disabled={submitting} className="w-full rounded-xl bg-[#0b66c3] px-5 py-3.5 text-sm font-extrabold text-white shadow-sm hover:bg-[#084d91] disabled:cursor-not-allowed disabled:opacity-50">{submitting ? 'SIGNING IN…' : 'SIGN IN'}</button>
+              </form>
+              <p className="mt-5 text-center text-sm text-slate-500">Don’t have an account? <button type="button" onClick={() => router.push('/signup')} className="font-bold text-[#0b66c3] hover:underline">Sign up</button></p>
+            </>
           )}
         </section>
         <p className="mt-5 text-center text-xs leading-5 text-slate-500">For life-threatening emergencies, call 911 immediately. BConnect is not a replacement for emergency services.</p>
