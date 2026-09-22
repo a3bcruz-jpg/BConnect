@@ -51,12 +51,12 @@ export default function BarangaysAdminPage() {
           </div>
           <div className="mt-6 grid gap-3 sm:grid-cols-4">
             {[
-              ['Barangays', barangays.length, Building2],
-              ['Residents', barangays.reduce((n, b) => n + b.residents, 0).toLocaleString(), Users],
-              ['Responders', barangays.reduce((n, b) => n + b.responders, 0), Radio],
-              ['Active incidents', barangays.reduce((n, b) => n + b.incidents, 0), ShieldCheck],
-            ].map(([label, value, Icon]) => (
-              <div key={String(label)} className="rounded-2xl border border-white/10 bg-[#071f1d] p-4">
+              { label: 'Barangays', value: barangays.length, Icon: Building2 },
+              { label: 'Residents', value: barangays.reduce((n, b) => n + b.residents, 0).toLocaleString(), Icon: Users },
+              { label: 'Responders', value: barangays.reduce((n, b) => n + b.responders, 0), Icon: Radio },
+              { label: 'Active incidents', value: barangays.reduce((n, b) => n + b.incidents, 0), Icon: ShieldCheck },
+            ].map(({ label, value, Icon }) => (
+              <div key={label} className="rounded-2xl border border-white/10 bg-[#071f1d] p-4">
                 <Icon className="h-5 w-5 text-[#7ec8ff]" />
                 <p className="mt-3 text-2xl font-extrabold">{value}</p>
                 <p className="mt-1 text-xs text-[#a9c9c0]">{label}</p>
