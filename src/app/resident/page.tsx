@@ -20,9 +20,9 @@ const quickLinks = [
 
 export default function ResidentPage() {
   return (
-    <main className="min-h-screen bg-[#f5f8fc] pb-24 text-[#10233f] sm:pb-8">
+    <main className="min-h-screen bg-[#f5f8fc] pb-24 text-[#10233f] sm:pb-8 bc-page-enter">
       <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-        <header className="flex items-center justify-between rounded-2xl border border-[#dce6f0] bg-white px-4 py-3 shadow-[0_8px_24px_rgba(16,35,63,0.04)]">
+        <header className="flex items-center justify-between rounded-2xl border border-[#dce6f0] bg-white bc-panel px-4 py-3 shadow-[0_8px_24px_rgba(16,35,63,0.04)]">
           <div className="flex items-center gap-3">
             <BrandMark />
             <div>
@@ -40,7 +40,7 @@ export default function ResidentPage() {
             <p className="text-sm font-semibold text-blue-100">Good morning, Juan</p>
             <h1 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">Your barangay, connected.</h1>
             <p className="mt-3 max-w-xl text-sm leading-6 text-blue-50">Report an urgent incident in seconds. BConnect helps organize the details so your barangay team can respond faster.</p>
-            <Link href="/resident/report" className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-white px-5 py-4 text-sm font-extrabold text-[#075aa9] shadow-sm transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-white/40 sm:w-auto">
+            <Link href="/resident/report" className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-white bc-panel px-5 py-4 text-sm font-extrabold text-[#075aa9] shadow-sm transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-white/40 sm:w-auto">
               <span className="mr-2 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 text-red-600" aria-hidden="true">!</span>
               REPORT AN INCIDENT
             </Link>
@@ -49,7 +49,7 @@ export default function ResidentPage() {
 
         <section className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="Quick actions">
           {quickLinks.map(([title, href, desc]) => (
-            <Link key={title} href={href} className="group rounded-2xl border border-[#dce6f0] bg-white p-4 shadow-[0_6px_18px_rgba(16,35,63,0.03)] transition hover:-translate-y-0.5 hover:border-[#b9d7f5] hover:shadow-md focus:outline-none focus:ring-4 focus:ring-[#0b66c3]/10">
+            <Link key={title} href={href} className="group rounded-2xl border border-[#dce6f0] bg-white bc-panel p-4 shadow-[0_6px_18px_rgba(16,35,63,0.03)] transition hover:-translate-y-0.5 hover:border-[#b9d7f5] hover:shadow-md focus:outline-none focus:ring-4 focus:ring-[#0b66c3]/10">
               <p className="text-sm font-extrabold text-[#10233f]">{title}</p>
               <p className="mt-1 text-xs leading-5 text-[#718096]">{desc}</p>
               <span className="mt-3 block text-xs font-bold text-[#0b66c3] opacity-0 transition group-hover:opacity-100">Open →</span>
@@ -58,7 +58,7 @@ export default function ResidentPage() {
         </section>
 
         <section className="mt-5 grid gap-5 lg:grid-cols-[1.15fr_.85fr]">
-          <div className="rounded-2xl border border-[#dce6f0] bg-white shadow-[0_8px_24px_rgba(16,35,63,0.04)]">
+          <div className="rounded-2xl border border-[#dce6f0] bg-white bc-panel shadow-[0_8px_24px_rgba(16,35,63,0.04)]">
             <div className="flex items-center justify-between border-b border-[#edf2f7] px-5 py-4">
               <div><h2 className="font-extrabold">Barangay status</h2><p className="mt-1 text-xs text-[#718096]">Current community advisory</p></div>
               <span className="rounded-full bg-[#e8f7f0] px-3 py-1 text-xs font-extrabold text-[#13734d]">Normal</span>
@@ -75,7 +75,7 @@ export default function ResidentPage() {
         <section className="mt-7 pb-4">
           <div className="flex items-end justify-between gap-4"><div><h2 className="text-lg font-extrabold">My recent reports</h2><p className="mt-1 text-xs text-[#718096]">Track the latest incidents you submitted.</p></div><Link href="/resident/reports/BC-2026-000124" className="shrink-0 text-xs font-extrabold text-[#0b66c3] hover:underline">View all</Link></div>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            {reports.map((report) => <Link key={report.id} href={`/resident/reports/${report.id}`} className="rounded-2xl border border-[#dce6f0] bg-white p-4 shadow-[0_6px_18px_rgba(16,35,63,0.03)] transition hover:border-[#b9d7f5] hover:shadow-md focus:outline-none focus:ring-4 focus:ring-[#0b66c3]/10">
+            {reports.map((report) => <Link key={report.id} href={`/resident/reports/${report.id}`} className="rounded-2xl border border-[#dce6f0] bg-white bc-panel p-4 shadow-[0_6px_18px_rgba(16,35,63,0.03)] transition hover:border-[#b9d7f5] hover:shadow-md focus:outline-none focus:ring-4 focus:ring-[#0b66c3]/10">
               <div className="flex items-start justify-between gap-3"><div><p className="text-sm font-extrabold">{report.title}</p><p className="mt-1 text-xs text-[#718096]">{report.id}</p></div><span className={`rounded-full border px-2.5 py-1 text-[11px] font-extrabold ${report.tone}`}>{report.status}</span></div>
               <p className="mt-3 text-xs text-[#53657a]">{report.meta}</p>
             </Link>)}
