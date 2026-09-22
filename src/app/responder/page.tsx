@@ -127,7 +127,7 @@ export default function ResponderPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen bg-slate-50 text-slate-900 bc-page-enter">
       <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-5">
           <Link href="/" className="rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
@@ -177,9 +177,9 @@ export default function ResponderPage() {
 
           {error && <div role="alert" className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-5 text-red-700">{error}</div>}
           {loading ? (
-            <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">Loading live assignments…</div>
+            <div className="mt-4 rounded-2xl border border-slate-200 bg-white bc-panel p-6 text-sm text-slate-500 shadow-sm">Loading live assignments…</div>
           ) : assignments.length === 0 ? (
-            <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm">
+            <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white bc-panel p-8 text-center shadow-sm">
               <p className="text-sm font-semibold text-slate-700">No active assignments</p>
               <p className="mt-1 text-xs text-slate-500">New assignments will appear here when they are linked to your responder account.</p>
             </div>
@@ -190,7 +190,7 @@ export default function ResponderPage() {
                 const status = statusLabels[incident.status] ?? formatText(incident.status);
                 const location = incident.location_text || (incident.latitude != null && incident.longitude != null ? `${incident.latitude.toFixed(5)}, ${incident.longitude.toFixed(5)}` : 'Location not provided');
                 return (
-                  <article key={incident.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md sm:p-6">
+                  <article key={incident.id} className="rounded-2xl border border-slate-200 bg-white bc-panel p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md sm:p-6">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
