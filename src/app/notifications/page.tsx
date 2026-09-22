@@ -60,9 +60,9 @@ export default function NotificationsPage() {
   useEffect(() => { void loadNotifications(); }, []);
 
   return (
-    <main className="min-h-screen bg-[#f5f8fc] text-[#10233f]">
+    <main className="min-h-screen bg-[#f5f8fc] text-[#10233f] bc-page-enter">
       <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8">
-        <header className="rounded-3xl border border-[#dce6f0] bg-white p-5 shadow-sm sm:p-6">
+        <header className="rounded-3xl border border-[#dce6f0] bg-white bc-panel p-5 shadow-sm sm:p-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#0b66c3]">BConnect</p>
@@ -77,9 +77,9 @@ export default function NotificationsPage() {
         </header>
 
         {error && <div role="alert" className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</div>}
-        {loading ? <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">Loading notifications...</div> : (
+        {loading ? <div className="mt-5 rounded-2xl border border-slate-200 bg-white bc-panel p-6 text-sm text-slate-500 shadow-sm">Loading notifications...</div> : (
           <section aria-label="Notification list" className="mt-5 space-y-3">
-            {!items.length && <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 shadow-sm">No notifications yet.</div>}
+            {!items.length && <div className="rounded-2xl border border-slate-200 bg-white bc-panel p-8 text-center text-sm text-slate-500 shadow-sm">No notifications yet.</div>}
             {items.map((item) => (
               <article key={item.id} className={`rounded-2xl border p-5 shadow-sm transition ${priorityClass[item.priority]} ${item.read_at ? 'opacity-70' : ''}`}>
                 <div className="flex items-start justify-between gap-4">
