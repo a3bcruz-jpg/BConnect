@@ -76,7 +76,7 @@ export default function LoginPage() {
     }
   }
 
-  if (loading) return <main className="flex min-h-screen items-center justify-center bg-[#f5f8fc] px-4 text-sm text-[#53657a]">Checking your BConnect session…</main>;
+  if (loading) return <main className="flex min-h-screen items-center justify-center bg-[#f5f8fc] px-4 text-sm text-[#53657a] bc-page-enter">Checking your BConnect session…</main>;
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f5f8fc] px-4 py-10 sm:py-14">
@@ -102,7 +102,7 @@ export default function LoginPage() {
             <form onSubmit={handlePasswordReset} className="mt-6 space-y-5">
               <div>
                 <label htmlFor="reset-email" className="mb-2 block text-sm font-bold text-[#10233f]">Email address</label>
-                <input id="reset-email" type="email" required autoComplete="email" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} className="w-full rounded-2xl border border-[#c4d2e0] bg-white px-4 py-3.5 text-sm text-[#10233f] outline-none transition placeholder:text-[#9aaabd] focus:border-[#0b66c3] focus:ring-4 focus:ring-[#0b66c3]/10" />
+                <input id="reset-email" type="email" required autoComplete="email" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} className="w-full rounded-2xl border border-[#c4d2e0] bg-white bc-panel px-4 py-3.5 text-sm text-[#10233f] outline-none transition placeholder:text-[#9aaabd] focus:border-[#0b66c3] focus:ring-4 focus:ring-[#0b66c3]/10" />
               </div>
               <button type="submit" disabled={submitting} className="w-full rounded-2xl bg-[#0b66c3] px-5 py-3.5 text-sm font-extrabold text-white transition hover:bg-[#084d91] focus:outline-none focus:ring-4 focus:ring-[#0b66c3]/20 disabled:cursor-not-allowed disabled:opacity-50">{submitting ? 'SENDING…' : 'SEND RESET LINK'}</button>
               <button type="button" onClick={() => { setResetMode(false); setError(''); setResetSent(false); }} className="w-full rounded-2xl px-4 py-2 text-sm font-bold text-[#0b66c3] transition hover:bg-[#eaf4ff] focus:outline-none focus:ring-4 focus:ring-[#0b66c3]/10">Back to sign in</button>
@@ -112,11 +112,11 @@ export default function LoginPage() {
               <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <div>
                   <label htmlFor="email" className="mb-2 block text-sm font-bold text-[#10233f]">Email address</label>
-                  <input id="email" type="email" required autoComplete="email" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} className="w-full rounded-2xl border border-[#c4d2e0] bg-white px-4 py-3.5 text-sm text-[#10233f] outline-none transition placeholder:text-[#9aaabd] focus:border-[#0b66c3] focus:ring-4 focus:ring-[#0b66c3]/10" />
+                  <input id="email" type="email" required autoComplete="email" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} className="w-full rounded-2xl border border-[#c4d2e0] bg-white bc-panel px-4 py-3.5 text-sm text-[#10233f] outline-none transition placeholder:text-[#9aaabd] focus:border-[#0b66c3] focus:ring-4 focus:ring-[#0b66c3]/10" />
                 </div>
                 <div>
                   <label htmlFor="password" className="mb-2 block text-sm font-bold text-[#10233f]">Password</label>
-                  <input id="password" type="password" required autoComplete="current-password" placeholder="Enter your password" value={password} onChange={(event) => setPassword(event.target.value)} className="w-full rounded-2xl border border-[#c4d2e0] bg-white px-4 py-3.5 text-sm text-[#10233f] outline-none transition placeholder:text-[#9aaabd] focus:border-[#0b66c3] focus:ring-4 focus:ring-[#0b66c3]/10" />
+                  <input id="password" type="password" required autoComplete="current-password" placeholder="Enter your password" value={password} onChange={(event) => setPassword(event.target.value)} className="w-full rounded-2xl border border-[#c4d2e0] bg-white bc-panel px-4 py-3.5 text-sm text-[#10233f] outline-none transition placeholder:text-[#9aaabd] focus:border-[#0b66c3] focus:ring-4 focus:ring-[#0b66c3]/10" />
                 </div>
                 <div className="text-right"><button type="button" onClick={() => { setResetMode(true); setError(''); }} className="rounded-lg text-sm font-bold text-[#0b66c3] hover:underline focus:outline-none focus:ring-4 focus:ring-[#0b66c3]/10">Forgot password?</button></div>
                 <button type="submit" disabled={submitting} className="w-full rounded-2xl bg-[#0b66c3] px-5 py-3.5 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#084d91] focus:outline-none focus:ring-4 focus:ring-[#0b66c3]/20 disabled:cursor-not-allowed disabled:opacity-50">{submitting ? 'SIGNING IN…' : 'SIGN IN'}</button>
