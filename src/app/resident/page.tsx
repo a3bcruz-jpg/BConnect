@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 const reports = [
   { id: 'BC-2026-000124', title: 'Vehicular Accident', meta: 'National Highway · 10:42 AM', status: 'Responding', tone: 'bg-orange-50 text-orange-700 border-orange-100' },
-  { id: 'BC-2026-000119', title: 'Flooded Road', meta: 'Zone 2 · Yesterday', status: 'Verified', tone: 'bg-blue-50 text-blue-700 border-blue-100' },
+  { id: 'BC-2026-000119', title: 'Flooded Road', meta: 'Zone 2 · Yesterday', status: 'Verified', tone: 'bg-[#e8f3ff] text-blue-700 border-blue-100' },
 ];
 
 function BrandMark() {
@@ -40,7 +40,7 @@ export default function ResidentPage() {
             <p className="text-sm font-semibold text-blue-100">Good morning, Juan</p>
             <h1 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">Your barangay, connected.</h1>
             <p className="mt-3 max-w-xl text-sm leading-6 text-blue-50">Report an urgent incident in seconds. BConnect helps organize the details so your barangay team can respond faster.</p>
-            <Link href="/resident/report" className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-white bc-panel px-5 py-4 text-sm font-extrabold text-[#075aa9] shadow-sm transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-white/40 sm:w-auto">
+            <Link href="/resident/report" className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-white bc-panel px-5 py-4 text-sm font-extrabold text-[#075aa9] shadow-sm transition hover:bg-[#e8f3ff] focus:outline-none focus:ring-4 focus:ring-white/40 sm:w-auto">
               <span className="mr-2 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 text-red-600" aria-hidden="true">!</span>
               REPORT AN INCIDENT
             </Link>
