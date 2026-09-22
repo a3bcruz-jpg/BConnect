@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 export default function SignupPage() {
@@ -10,15 +11,28 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [barangayId, setBarangayId] = useState('');
+  const [barangays, setBarangays] = useState<{ id: string; name: string; municipality: string }[]>([]);
+  const [loadingBarangays, setLoadingBarangays] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    supabase.from('barangays').select('id, name, municipality').order('name').then(({ data, error: loadError }) => {
+      if (loadError) setError('Unable to load barangays. Please try again.');
+      setBarangays(data ?? []);
+      setLoadingBarangays(false);
+    });
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
     setMessage('');
     if (!fullName.trim()) return setError('Please enter your full name.');
+    if (!barangayId) return setError('Please select your barangay.');
     if (password !== confirmPassword) return setError('Passwords do not match.');
     if (password.length < 8) return setError('Password must be at least 8 characters.');
 
@@ -28,7 +42,7 @@ export default function SignupPage() {
       const { data, error: signupError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
-        options: { data: { full_name: fullName.trim() } },
+        options: { data: { full_name: fullName.trim(), barangay_id: barangayId } },
       });
       if (signupError) throw signupError;
 
@@ -42,6 +56,7 @@ export default function SignupPage() {
       setEmail('');
       setPassword('');
       setConfirmPassword('');
+      setBarangayId('');
     } catch (signupError) {
       setError(signupError instanceof Error ? signupError.message : 'Unable to create your account.');
     } finally {
@@ -73,6 +88,14 @@ export default function SignupPage() {
             <div>
               <label htmlFor="full-name" className="mb-2 block text-sm font-bold text-[#10233f]">Full name</label>
               <input id="full-name" type="text" required autoComplete="name" placeholder="Juan Dela Cruz" value={fullName} onChange={(event) => setFullName(event.target.value)} className="w-full rounded-2xl border border-[#c4d2e0] bg-white px-4 py-3.5 text-sm text-[#10233f] outline-none transition placeholder:text-[#9aaabd] focus:border-[#0b66c3] focus:ring-4 focus:ring-[#0b66c3]/10" />
+            </div>
+            <div>
+              <label htmlFor="barangay" className="mb-2 block text-sm font-bold text-[#10233f]">Barangay</label>
+              <select id="barangay" required value={barangayId} onChange={(event) => setBarangayId(event.target.value)} disabled={loadingBarangays} className="w-full rounded-2xl border border-[#c4d2e0] bg-white px-4 py-3.5 text-sm text-[#10233f] outline-none transition focus:border-[#0b66c3] focus:ring-4 focus:ring-[#0b66c3]/10">
+                <option value="">{loadingBarangays ? 'Loading barangays…' : 'Select your barangay'}</option>
+                {barangays.map((barangay) => <option key={barangay.id} value={barangay.id}>{barangay.name} · {barangay.municipality}</option>)}
+              </select>
+              <p className="mt-2 text-xs text-[#718096]">Your account will be scoped to this community.</p>
             </div>
             <div>
               <label htmlFor="signup-email" className="mb-2 block text-sm font-bold text-[#10233f]">Email address</label>
