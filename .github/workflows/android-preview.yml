@@ -1,0 +1,106 @@
+name: BConnect Android Preview
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/incident-ops-live
+
+permissions:
+  contents: read
+
+jobs:
+  android-debug:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Bootstrap Android SDK command-line tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="$RUNNER_TEMP/android-sdk"
+          DOWNLOAD_DIR="$RUNNER_TEMP/android-cmdline-tools-download"
+          CMDLINE_DIR="$SDK_ROOT/cmdline-tools/latest"
+
+          rm -rf "$SDK_ROOT" "$DOWNLOAD_DIR"
+          mkdir -p "$SDK_ROOT/cmdline-tools" "$DOWNLOAD_DIR"
+
+          curl --fail --silent --show-error --location \
+            https://dl.google.com/android/repository/commandlinetools-linux-12266719_latest.zip \
+            --output "$RUNNER_TEMP/android-cmdline-tools.zip"
+          unzip -q "$RUNNER_TEMP/android-cmdline-tools.zip" -d "$DOWNLOAD_DIR"
+          test -x "$DOWNLOAD_DIR/cmdline-tools/bin/sdkmanager"
+          mv "$DOWNLOAD_DIR/cmdline-tools" "$CMDLINE_DIR"
+
+          SDKMANAGER="$CMDLINE_DIR/bin/sdkmanager"
+          test -x "$SDKMANAGER"
+          {
+            echo "ANDROID_SDK_ROOT=$SDK_ROOT"
+            echo "ANDROID_HOME=$SDK_ROOT"
+            echo "SDKMANAGER=$SDKMANAGER"
+          } >> "$GITHUB_ENV"
+          {
+            echo "$CMDLINE_DIR/bin"
+            echo "$SDK_ROOT/platform-tools"
+          } >> "$GITHUB_PATH"
+
+      - name: Install required Android packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          yes | "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" --licenses >/dev/null || true
+          "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" \
+            "platform-tools" \
+            "platforms;android-36" \
+            "build-tools;36.0.0"
+
+      - name: Verify Android SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v sdkmanager
+          command -v adb
+          adb version
+          "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" --list_installed \
+            | grep -E 'platforms;android-36|build-tools;36.0.0'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create Android project
+        run: npx cap add android
+
+      - name: Sync Capacitor
+        env:
+          BCONNECT_APP_URL: https://b-connect-git-feat-incident-ops-live-a3bcruz-9374s-projects.vercel.app
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      - name: Verify APK
+        run: test -f android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: bconnect-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

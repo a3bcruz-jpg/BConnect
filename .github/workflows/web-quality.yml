@@ -1,0 +1,37 @@
+name: BConnect Web Quality
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/incident-ops-live
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: web-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Production build
+        run: npm run build
