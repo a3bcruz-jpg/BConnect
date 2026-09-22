@@ -15,7 +15,7 @@ const categoryLabels: Record<string, string> = {
 
 const navigation = [
   ['Dashboard', '/resident', Home], ['My Reports', '/resident/reports', FileText], ['Map', '#map', MapPin],
-  ['Notifications', '/notifications', Bell], ['Community', '#community', Users], ['Profile', '#profile', UserRound], ['Settings', '#settings', Settings],
+  ['Notifications', '/notifications', Bell], ['Community', '#community', Users], ['Profile', '/profile', UserRound], ['Settings', '/profile', Settings],
 ] as const;
 
 function Brand() {
@@ -91,6 +91,6 @@ export default function ResidentPage() {
         </div>
       </section>
     </div>
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#041f1b]/95 px-2 py-2 backdrop-blur lg:hidden"><div className="mx-auto grid max-w-md grid-cols-4 text-center text-[10px] font-bold text-[#7fa99e]"><Link href="/resident" className="rounded-xl py-2 text-[#31d477]"><Home className="mx-auto h-4 w-4" /><span>Home</span></Link><Link href="/resident/reports" className="rounded-xl py-2"><FileText className="mx-auto h-4 w-4" /><span>Reports</span></Link><Link href="/notifications" className="rounded-xl py-2"><Bell className="mx-auto h-4 w-4" /><span>Updates</span></Link><Link href="#profile" className="rounded-xl py-2"><UserRound className="mx-auto h-4 w-4" /><span>Profile</span></Link></div></nav>
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#041f1b]/95 px-2 py-2 backdrop-blur lg:hidden"><div className="mx-auto grid max-w-md grid-cols-4 text-center text-[10px] font-bold text-[#7fa99e]"><Link href="/resident" className="rounded-xl py-2 text-[#31d477]"><Home className="mx-auto h-4 w-4" /><span>Home</span></Link><Link href="/resident/reports" className="rounded-xl py-2"><FileText className="mx-auto h-4 w-4" /><span>Reports</span></Link><Link href="/notifications" className="rounded-xl py-2"><Bell className="mx-auto h-4 w-4" /><span>Updates</span></Link><Link href="/profile" className="rounded-xl py-2"><UserRound className="mx-auto h-4 w-4" /><span>Profile</span></Link></div></nav>
   </main>;
 }
