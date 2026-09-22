@@ -97,11 +97,47 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
     if (requestedStatus || note || assignedTo || priority) {
       const historyNote = assignedTo ? `Assigned responder: ${responderName ?? assignedTo}${note ? ` — ${note}` : ''}` : note ?? null;
-      const { error: historyError } = await supabase.from('incident_updates').insert({ incident_id: id, user_id: authData.user.id, previous_status: incident.status, new_status: requestedStatus ?? incident.status, note: historyNote });
+      const { error: historyError } = await supabase.from('incident_updates').insert({
+        incident_id: id,
+        user_id: authData.user.id,
+        previous_status: incident.status,
+        new_status: requestedStatus ?? incident.status,
+        note: historyNote,
+      });
       if (historyError) console.error('incident history insert failed', historyError);
     }
+
+    const auditAction = assignedTo
+      ? 'incident.assigned'
+      : requestedStatus
+        ? `incident.status_changed`
+        : priority
+          ? 'incident.priority_changed'
+          : 'incident.updated';
+
+    const { error: auditError } = await supabase.rpc('append_audit_log', {
+      p_action: auditAction,
+      p_resource_type: 'incident',
+      p_resource_id: id,
+      p_metadata: {
+        reference_number: incident.reference_number,
+        previous_status: incident.status,
+        new_status: requestedStatus ?? incident.status,
+        assigned_to: assignedTo ?? incident.assigned_to ?? null,
+        priority: priority ?? null,
+      },
+    });
+    if (auditError) console.error('incident audit insert failed', auditError);
+
     if (assignedTo) {
-      const { error: notificationError } = await supabase.from('notifications').insert({ user_id: assignedTo, incident_id: id, type: 'incident_assignment', title: 'New incident assignment', message: `You have been assigned to incident ${incident.reference_number}.`, is_read: false });
+      const { error: notificationError } = await supabase.rpc('create_notification', {
+        p_user_id: assignedTo,
+        p_incident_id: id,
+        p_type: 'incident_assigned',
+        p_priority: priority === 'critical' ? 'critical' : priority === 'high' ? 'high' : 'normal',
+        p_title: 'New incident assignment',
+        p_message: `You have been assigned to incident ${incident.reference_number}.`,
+      });
       if (notificationError) console.error('assignment notification insert failed', notificationError);
     }
     return NextResponse.json({ incident: updatedIncident });
