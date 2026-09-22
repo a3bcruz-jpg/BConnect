@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'BConnect',
   webDir: 'public',
   server: {
-    url: process.env.BCONNECT_APP_URL || 'https://b-connect-i7ovoxuy4-a3bcruz-9374s-projects.vercel.app',
+    url: process.env.BCONNECT_APP_URL || 'https://b-connect-git-feat-incident-ops-live-a3bcruz-9374s-projects.vercel.app',
     cleartext: false,
   },
   android: {
