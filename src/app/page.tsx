@@ -23,7 +23,7 @@ const workflow = ['Report', 'Verify', 'Assign', 'Respond', 'Resolve'];
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] bc-page-enter">
       <section className="border-b border-[var(--border)] bg-white">
         <div className="mx-auto max-w-6xl px-6 pb-20 pt-8 lg:px-8 lg:pb-24">
           <header className="flex items-center justify-between gap-6">
@@ -58,7 +58,7 @@ export default function HomePage() {
             </div>
 
             <div className="rounded-[20px] border border-[var(--border)] bg-[var(--background)] p-5 shadow-sm sm:p-6">
-              <div className="rounded-2xl border border-[var(--border)] bg-white p-5">
+              <div className="rounded-2xl border border-[var(--border)] bg-white bc-panel p-5">
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Incident workflow</p>
@@ -88,7 +88,7 @@ export default function HomePage() {
         </div>
         <div className="mt-10 grid gap-4 md:grid-cols-3">
           {features.map(({ icon: Icon, title, description }) => (
-            <article key={title} className="rounded-2xl border border-[var(--border)] bg-white p-6 shadow-sm">
+            <article key={title} className="rounded-2xl border border-[var(--border)] bg-white bc-panel p-6 shadow-sm">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]"><Icon className="h-5 w-5" aria-hidden="true" /></div>
               <h3 className="mt-5 text-base font-bold">{title}</h3>
               <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">{description}</p>
