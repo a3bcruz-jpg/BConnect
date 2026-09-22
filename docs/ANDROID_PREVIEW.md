@@ -4,10 +4,10 @@ BConnect uses the existing Next.js application inside a Capacitor Android shell.
 
 ## Prerequisites
 
-- Node.js 20+
+- Node.js 22+
 - Android Studio
 - Android SDK and an Android emulator or USB-debuggable Android phone
-- Java 17+
+- Java 21+
 
 ## Install Capacitor dependencies
 
@@ -25,7 +25,7 @@ The generated `android/` directory is native build output and should be committe
 
 ## Preview the deployed BConnect app
 
-Set `CAPACITOR_SERVER_URL` to the HTTPS BConnect deployment you want to preview, then run:
+Set `BCONNECT_APP_URL` to the HTTPS BConnect deployment you want to preview, then run:
 
 ```bash
 npx cap sync android
@@ -35,7 +35,7 @@ npx cap open android
 For example, in PowerShell:
 
 ```powershell
-$env:CAPACITOR_SERVER_URL='https://YOUR-BCONNECT-PREVIEW.vercel.app'
+$env:BCONNECT_APP_URL='https://YOUR-BCONNECT-PREVIEW.vercel.app'
 npx cap sync android
 npx cap open android
 ```
