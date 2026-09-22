@@ -22,7 +22,7 @@ const priorityStyles: Record<string, string> = {
   critical: 'border border-red-200 bg-red-50 text-red-700',
   high: 'border border-red-200 bg-red-50 text-red-700',
   medium: 'border border-amber-200 bg-amber-50 text-amber-700',
-  low: 'border border-slate-200 bg-slate-100 text-slate-700',
+  low: 'border border-slate-200 bg-[#e8f3ff] text-slate-700',
 };
 
 const statusLabels: Record<string, string> = {
@@ -127,7 +127,7 @@ export default function ResponderPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 bc-page-enter">
+    <main className="min-h-screen bg-[#f0f7ff] text-slate-900 bc-page-enter">
       <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-5">
           <Link href="/" className="rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
@@ -162,7 +162,7 @@ export default function ResponderPage() {
               <h1 className="mt-1 text-3xl font-semibold tracking-tight sm:text-4xl">{assignments.length} active incidents</h1>
               <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">Review verified information, acknowledge assignments, and keep the barangay team updated with timely status changes.</p>
             </div>
-            <Link href="/official" className="rounded-xl bg-white px-4 py-3 text-center text-sm font-semibold text-slate-950 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-slate-950">Official dashboard</Link>
+            <Link href="/official" className="rounded-xl bg-white px-4 py-3 text-center text-sm font-semibold text-slate-950 transition hover:bg-[#e8f3ff] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-slate-950">Official dashboard</Link>
           </div>
         </section>
 
@@ -172,7 +172,7 @@ export default function ResponderPage() {
               <h2 id="active-assignments-heading" className="text-lg font-semibold tracking-tight text-slate-950">Active assignments</h2>
               <p className="mt-1 text-xs text-slate-500">Automatically refreshed every 30 seconds.</p>
             </div>
-            <button type="button" onClick={loadAssignments} disabled={loading} className="rounded-lg px-2 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:cursor-wait disabled:opacity-50">Refresh</button>
+            <button type="button" onClick={loadAssignments} disabled={loading} className="rounded-lg px-2 py-2 text-xs font-semibold text-blue-700 transition hover:bg-[#e8f3ff] focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:cursor-wait disabled:opacity-50">Refresh</button>
           </div>
 
           {error && <div role="alert" className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-5 text-red-700">{error}</div>}
@@ -200,11 +200,11 @@ export default function ResponderPage() {
                         <p className="mt-2 text-xs font-medium text-slate-500">{incident.reference_number} · {formatReported(incident.created_at)}</p>
                         <p className="mt-3 break-words text-sm text-slate-700">{location}</p>
                       </div>
-                      <span className="w-fit rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{status}</span>
+                      <span className="w-fit rounded-full border border-slate-200 bg-[#e8f3ff] px-3 py-1 text-xs font-semibold text-slate-700">{status}</span>
                     </div>
                     <div className="mt-5 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
                       <Link href={`/responder/incidents/${incident.id}`} className="rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2">Open incident</Link>
-                      <Link href={`/responder/incidents/${incident.id}`} className="rounded-xl border border-slate-300 px-4 py-2.5 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">Update status</Link>
+                      <Link href={`/responder/incidents/${incident.id}`} className="rounded-xl border border-slate-300 px-4 py-2.5 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-[#f0f7ff] focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">Update status</Link>
                     </div>
                   </article>
                 );
