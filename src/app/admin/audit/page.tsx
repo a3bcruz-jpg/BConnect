@@ -59,12 +59,12 @@ export default function AuditPage() {
 
           <div className="mt-6 grid gap-3 sm:grid-cols-4">
             {[
-              ['Events today', '128', Activity],
-              ['Successful', '124', CheckCircle2],
-              ['Needs review', '4', Clock3],
-              ['Protected', '100%', ShieldCheck],
-            ].map(([label, value, Icon]) => (
-              <div key={String(label)} className="rounded-2xl border border-white/10 bg-[#071f1d] p-4">
+              { label: 'Events today', value: '128', Icon: Activity },
+              { label: 'Successful', value: '124', Icon: CheckCircle2 },
+              { label: 'Needs review', value: '4', Icon: Clock3 },
+              { label: 'Protected', value: '100%', Icon: ShieldCheck },
+            ].map(({ label, value, Icon }) => (
+              <div key={label} className="rounded-2xl border border-white/10 bg-[#071f1d] p-4">
                 <Icon className="h-5 w-5 text-[#7ec8ff]" />
                 <p className="mt-3 text-2xl font-extrabold">{value}</p>
                 <p className="mt-1 text-xs text-[#a9c9c0]">{label}</p>
