@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 
 const categories = [
   ['fire', 'Fire'], ['medical', 'Medical'], ['accident', 'Accident'], ['crime_safety', 'Crime / Safety'],
@@ -11,7 +11,31 @@ const categories = [
 ] as const;
 
 type LocationState = { latitude: number; longitude: number; accuracyMeters?: number };
-type CreatedIncident = { id: string; reference_number: string; status: string; created_at: string };
+type CreatedIncident = { id: string; reference_number: string; status: string; created_at: string; queued?: boolean };
+type QueuedReport = {
+  localId: string;
+  description: string;
+  category?: string;
+  location?: LocationState;
+  queuedAt: string;
+};
+
+const QUEUE_KEY = 'bconnect:offline-report-queue';
+
+function readQueue(): QueuedReport[] {
+  try {
+    const raw = window.localStorage.getItem(QUEUE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeQueue(queue: QueuedReport[]) {
+  window.localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+}
 
 export default function ReportIncidentPage() {
   const [description, setDescription] = useState('');
@@ -23,6 +47,73 @@ export default function ReportIncidentPage() {
   const [submitted, setSubmitted] = useState<CreatedIncident | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [queuedCount, setQueuedCount] = useState(0);
+
+  function refreshQueueCount() {
+    setQueuedCount(readQueue().length);
+  }
+
+  function queueReport() {
+    const queue = readQueue();
+    const item: QueuedReport = {
+      localId: crypto.randomUUID(),
+      description: description.trim(),
+      ...(category ? { category } : {}),
+      ...(location ? { location } : {}),
+      queuedAt: new Date().toISOString(),
+    };
+    writeQueue([...queue, item]);
+    setQueuedCount(queue.length + 1);
+    setSubmitted({
+      id: item.localId,
+      reference_number: 'Pending sync',
+      status: 'queued',
+      created_at: item.queuedAt,
+      queued: true,
+    });
+  }
+
+  async function syncQueuedReports() {
+    const queue = readQueue();
+    if (!navigator.onLine || queue.length === 0) {
+      setQueuedCount(queue.length);
+      return;
+    }
+
+    const remaining: QueuedReport[] = [];
+    for (const item of queue) {
+      try {
+        const response = await fetch('/api/incidents', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            description: item.description,
+            ...(item.category ? { category: item.category } : {}),
+            ...(item.location ? { location: item.location } : {}),
+          }),
+        });
+
+        if (!response.ok) {
+          remaining.push(item);
+          continue;
+        }
+      } catch {
+        remaining.push(item);
+        break;
+      }
+    }
+
+    writeQueue(remaining);
+    setQueuedCount(remaining.length);
+  }
+
+  useEffect(() => {
+    refreshQueueCount();
+    syncQueuedReports();
+    const handleOnline = () => { syncQueuedReports(); };
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, []);
 
   function captureLocation() {
     if (!navigator.geolocation) {
@@ -62,6 +153,13 @@ export default function ReportIncidentPage() {
     if (submitting) return;
     setSubmitting(true);
     setError('');
+
+    if (!navigator.onLine) {
+      queueReport();
+      setSubmitting(false);
+      return;
+    }
+
     try {
       const response = await fetch('/api/incidents', {
         method: 'POST',
@@ -75,7 +173,11 @@ export default function ReportIncidentPage() {
       }
       setSubmitted(payload.incident);
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'Unable to submit your report. Please try again.');
+      if (submitError instanceof TypeError || !navigator.onLine) {
+        queueReport();
+      } else {
+        setError(submitError instanceof Error ? submitError.message : 'Unable to submit your report. Please try again.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -85,9 +187,9 @@ export default function ReportIncidentPage() {
     <main className="min-h-screen bg-[#f5f8fc] px-4 py-8 sm:px-6 bc-page-enter"><div className="mx-auto max-w-lg pt-8"><div className="rounded-3xl border border-[#dce6f0] bg-white bc-panel p-7 text-center shadow-sm sm:p-10">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-3xl font-bold text-emerald-600">✓</div>
       <p className="mt-6 text-xs font-bold uppercase tracking-widest text-[#0b66c3]">BConnect</p><h1 className="mt-2 text-2xl font-extrabold tracking-tight">Report submitted</h1>
-      <p className="mt-2 text-sm leading-6 text-slate-600">Your report has been received and is now available for barangay verification.</p>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{submitted?.queued ? 'Your report is safely saved on this device and will be sent automatically when your connection returns.' : 'Your report has been received and is now available for barangay verification.'}</p>
       <div className="mt-6 rounded-2xl bg-[#f5f8fc] p-4 text-left"><p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Incident reference</p><p className="mt-1 font-mono text-sm font-bold text-[#10233f]">{submitted.reference_number}</p><p className="mt-2 text-xs text-slate-500">Status: {submitted.status.replaceAll('_', ' ')}</p></div>
-      <div className="mt-6 grid gap-3 sm:grid-cols-2"><Link href={`/resident/reports/${submitted.id}`} className="rounded-xl bg-[#0b66c3] px-4 py-3 text-sm font-bold text-white">Track report</Link><Link href="/resident" className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-700">Back home</Link></div>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">{submitted.queued ? <button type="button" onClick={() => { setSubmitted(null); setStep('report'); setDescription(''); setCategory(''); setLocation(null); }} className="rounded-xl bg-[#0b66c3] px-4 py-3 text-sm font-bold text-white">Report another</button> : <Link href={`/resident/reports/${submitted.id}`} className="rounded-xl bg-[#0b66c3] px-4 py-3 text-sm font-bold text-white">Track report</Link>}<Link href="/resident" className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-700">Back home</Link></div>
     </div></div></main>
   );
 
