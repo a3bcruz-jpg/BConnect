@@ -4,6 +4,19 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 const staffRoles = ['super_admin', 'lgu_admin', 'barangay_admin', 'official', 'responder', 'auditor'];
 const workflowRoles = ['super_admin', 'lgu_admin', 'barangay_admin', 'official', 'responder'];
 const assignmentRoles = ['super_admin', 'lgu_admin', 'barangay_admin', 'official'];
+const statusNotificationLabels: Record<string, string> = {
+  pending_verification: 'For verification',
+  verified: 'Verified',
+  assigned: 'Responder assigned',
+  accepted: 'Responder accepted',
+  responding: 'Responder responding',
+  on_site: 'Responder on site',
+  resolved: 'Incident resolved',
+  closed: 'Incident closed',
+  rejected: 'Report rejected',
+  duplicate: 'Report marked as duplicate',
+  cancelled: 'Report cancelled',
+};
 
 const transitions: Record<string, string[]> = {
   submitted: ['pending_verification', 'rejected', 'duplicate', 'cancelled'],
@@ -57,7 +70,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { data: profile } = await supabase.from('profiles').select('id, barangay_id, role, is_active').eq('id', authData.user.id).maybeSingle();
     if (!profile?.is_active || !profile.barangay_id || !workflowRoles.includes(profile.role)) return NextResponse.json({ error: 'You are not authorized to manage incidents.' }, { status: 403 });
 
-    const { data: incident, error: incidentError } = await supabase.from('incidents').select('id, reference_number, barangay_id, status, assigned_to').eq('id', id).single();
+    const { data: incident, error: incidentError } = await supabase.from('incidents').select('id, reference_number, barangay_id, reporter_id, status, assigned_to').eq('id', id).single();
     if (incidentError || !incident) return NextResponse.json({ error: 'Incident not found.' }, { status: 404 });
     if (incident.barangay_id !== profile.barangay_id) return NextResponse.json({ error: 'Incident belongs to another barangay.' }, { status: 403 });
 
@@ -140,6 +153,28 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       });
       if (notificationError) console.error('assignment notification insert failed', notificationError);
     }
+
+    if (requestedStatus && requestedStatus !== incident.status && incident.reporter_id) {
+      const label = statusNotificationLabels[requestedStatus] ?? requestedStatus.replaceAll('_', ' ');
+      const notificationPriority = requestedStatus === 'closed' || requestedStatus === 'resolved'
+        ? 'normal'
+        : priority === 'critical'
+          ? 'critical'
+          : priority === 'high'
+            ? 'high'
+            : 'normal';
+
+      const { error: reporterNotificationError } = await supabase.rpc('create_notification', {
+        p_user_id: incident.reporter_id,
+        p_incident_id: id,
+        p_type: 'incident_status_changed',
+        p_priority: notificationPriority,
+        p_title: `Report status updated: ${label}`,
+        p_message: `Incident ${incident.reference_number} is now ${label}.`,
+      });
+      if (reporterNotificationError) console.error('reporter status notification insert failed', reporterNotificationError);
+    }
+
     return NextResponse.json({ incident: updatedIncident });
   } catch (error) {
     console.error('incident update failed', error);
