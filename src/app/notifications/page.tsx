@@ -57,7 +57,11 @@ export default function NotificationsPage() {
     }
   }
 
-  useEffect(() => { void loadNotifications(); }, []);
+  useEffect(() => {
+    void loadNotifications();
+    const timer = window.setInterval(() => { void loadNotifications(); }, 20000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   return (
     <main className="min-h-screen bg-[#f5f8fc] text-[#10233f] bc-page-enter">
@@ -67,7 +71,7 @@ export default function NotificationsPage() {
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#0b66c3]">BConnect</p>
               <h1 className="mt-1 text-2xl font-extrabold tracking-tight">Notifications</h1>
-              <p className="mt-1 text-sm text-slate-500" aria-live="polite">{unread} unread notification{unread === 1 ? '' : 's'}</p>
+              <p className="mt-1 text-sm text-slate-500" aria-live="polite">{unread} unread notification{unread === 1 ? '' : 's'} · Updates every 20 seconds</p>
             </div>
             <div className="flex gap-2">
               <button type="button" onClick={() => void loadNotifications()} disabled={loading} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0b66c3] disabled:cursor-not-allowed disabled:opacity-50">Refresh</button>
