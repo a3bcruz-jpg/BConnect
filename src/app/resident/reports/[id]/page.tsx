@@ -57,20 +57,44 @@ export default function ResidentReportPage({ params }: { params: Promise<{ id: s
 
   useEffect(() => {
     let active = true;
-    params.then(({ id: routeId }) => {
+    let timer: number | undefined;
+
+    async function refresh(routeId: string, initial = false) {
+      try {
+        const response = await fetch(`/api/incidents/${encodeURIComponent(routeId)}`, { cache: 'no-store' });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error ?? 'Unable to load this report.');
+        if (!active) return;
+        setIncident(payload.incident);
+        setUpdates(payload.updates ?? []);
+        setError('');
+        if (initial) setLoading(false);
+        return payload.incident?.status as string | undefined;
+      } catch (loadError) {
+        if (!active) return;
+        setError(loadError instanceof Error ? loadError.message : 'Unable to load this report.');
+        if (initial) setLoading(false);
+      }
+    }
+
+    params.then(async ({ id: routeId }) => {
       if (!active) return;
       setId(routeId);
-      fetch(`/api/incidents/${encodeURIComponent(routeId)}`)
-        .then(async (response) => {
-          const payload = await response.json().catch(() => ({}));
-          if (!response.ok) throw new Error(payload.error ?? 'Unable to load this report.');
-          return payload;
-        })
-        .then((payload) => { if (active) { setIncident(payload.incident); setUpdates(payload.updates ?? []); } })
-        .catch((loadError) => { if (active) setError(loadError instanceof Error ? loadError.message : 'Unable to load this report.'); })
-        .finally(() => { if (active) setLoading(false); });
+      const status = await refresh(routeId, true);
+      if (!active || ['closed', 'rejected', 'duplicate', 'cancelled'].includes(status ?? '')) return;
+      timer = window.setInterval(async () => {
+        const nextStatus = await refresh(routeId);
+        if (['closed', 'rejected', 'duplicate', 'cancelled'].includes(nextStatus ?? '')) {
+          if (timer) window.clearInterval(timer);
+          timer = undefined;
+        }
+      }, 15000);
     });
-    return () => { active = false; };
+
+    return () => {
+      active = false;
+      if (timer) window.clearInterval(timer);
+    };
   }, [params]);
 
   const currentStage = useMemo(() => stages.findIndex(([status]) => status === incident?.status), [incident?.status]);
